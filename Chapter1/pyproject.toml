@@ -1,0 +1,9 @@
+[project]
+name = "nnp-2ed-ch1"
+version = "0.1.0"
+description = "Misc code pieces"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy>=2.4.4",
+    "pytest>=9.0.3",
+]
