@@ -4,5 +4,7 @@
 __pycache__
 .ipynb_checkpoints
 *.png
+*.svg
 .DS_Store
 .pytest_cache
+*.keras

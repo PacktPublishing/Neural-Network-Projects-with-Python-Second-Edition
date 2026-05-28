@@ -1,0 +1,23 @@
+[project]
+name = "nnp-2ed-ch3"
+version = "0.1.0"
+description = "Neural Network Projects 2nd edition examples"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "anywidget>=0.9.21",
+    "jupyterlab>=4.5.6",
+    "kagglehub[pandas-datasets]>=1.0.0",
+    "kaleido>=1.2.0",
+    "keras~=3.13.2",
+    "matplotlib>=3.10.9",
+    "pandas>=2.3.3",
+    "plotly>=6.6.0",
+    "pytest>=9.0.2",
+    "scikit-learn>=1.8.0",
+    "setuptools>=82.0.1",
+    "tabulate>=0.10.0",
+    "tensorflow~=2.21.0",
+    "timer-context~=1.1.1",
+    "torch~=2.10.0",
+]
