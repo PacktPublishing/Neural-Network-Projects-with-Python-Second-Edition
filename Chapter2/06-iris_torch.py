@@ -21,6 +21,7 @@ class Network(nn.Module):
 
 
 if __name__ == "__main__":
+    torch.manual_seed(19)
     df = data_iris.iris_df()
     one_hot_df = data_iris.one_hot_classes(df)
     data_x = data_iris.data_features(one_hot_df)
@@ -53,9 +54,9 @@ if __name__ == "__main__":
     # inference - predict results on test dataset
     X_test_t = torch.as_tensor(X_test, dtype=torch.float)
     Y_test_t = torch.as_tensor(Y_test, dtype=torch.float)
-    model.train(False)
-    preds_t = model(X_test_t).detach()
-    preds = preds_t.numpy()
+    with torch.no_grad():
+        preds_t = model(X_test_t).detach()
+        preds = preds_t.numpy()
 
     # use argmax, as confusion_matrix requires class labels, not one-hot
     data_iris.show_confusion_matrix(Y_test.argmax(axis=1),
