@@ -17,5 +17,5 @@ dependencies = [
     "tabulate>=0.10.0",
     "tensorflow~=2.21.0",
     "timer-context~=1.1.1",
-    "torch~=2.10.0",
+    "torch~=2.13.0",
 ]
