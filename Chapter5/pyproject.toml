@@ -19,7 +19,7 @@ dependencies = [
     "setuptools==81.0.0",
     "tensorboard>=2.20.0",
     "timer-context~=1.1.1",
-    "torch>=2.12.1",
+    "torch>=2.13.0",
     "torchvision>=0.27.1",
     "transformers[torch]>=5.13.1",
 ]
