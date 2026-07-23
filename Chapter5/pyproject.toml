@@ -16,7 +16,7 @@ dependencies = [
     "plotly>=6.6.0",
     "pytest>=9.0.2",
     "scikit-learn>=1.9.0",
-    "setuptools==81.0.0",
+    "setuptools==83.0.0",
     "tensorboard>=2.20.0",
     "timer-context~=1.1.1",
     "torch>=2.12.1",
