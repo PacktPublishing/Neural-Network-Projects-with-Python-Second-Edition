@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "albumentationsx[headless]>=2.3.1",
     "anywidget>=0.9.21",
-    "jupyterlab>=4.5.6",
+    "jupyterlab>=4.6.2",
     "kagglehub[pandas-datasets]>=1.0.0",
     "matplotlib>=3.11.0",
     "opencv-python>=4.13.0.92",
