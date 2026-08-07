@@ -1,0 +1,37 @@
+[project]
+name = "nnp-2ed-ch6"
+version = "0.1.0"
+description = "Neural Network Projects 2nd edition examples"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "albumentationsx[headless]>=2.3.1",
+    "anywidget>=0.9.21",
+    "jupyterlab>=4.5.6",
+    "kagglehub[pandas-datasets]>=1.0.0",
+    "matplotlib>=3.11.0",
+    "opencv-python>=4.13.0.92",
+    "pandas>=2.3.3",
+    "pillow>=12.2.0",
+    "plotly>=6.6.0",
+    "pytest>=9.0.2",
+    "scikit-learn>=1.9.0",
+    "setuptools==81.0.0",
+    "tensorboard>=2.20.0",
+    "timer-context~=1.1.1",
+    "torch>=2.12.1",
+    "torchvision>=0.27.1",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu126", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+torchvision = [
+  { index = "pytorch-cu126", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
