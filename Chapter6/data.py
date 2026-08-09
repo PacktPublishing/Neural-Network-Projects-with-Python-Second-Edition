@@ -21,7 +21,6 @@ TSample = tt.Tuple[pathlib.Path, str]
 # Transformations applied before the noise
 PREPROCESS_TRANSFORM = A.Compose([
     A.RandomCrop(TARGET_SIZE, TARGET_SIZE, fill=FILL_COLOR, pad_if_needed=True),
-    A.Normalize(normalization="min_max", max_pixel_value=255),
 ])
 
 
@@ -107,6 +106,7 @@ class DenoiseImagesDataset(Dataset):
         file_path, _ = self.samples[item]
         img = cv2.imread(file_path, flags=cv2.IMREAD_COLOR_RGB)
         prep_img = PREPROCESS_TRANSFORM(image=img)['image']
+        prep_img = prep_img.astype(np.float32) / 255.0
         noisy_img = self.noise(image=prep_img)['image']
         src_img = noisy_img.transpose((2, 0, 1))
         tgt_img = prep_img.transpose((2, 0, 1))

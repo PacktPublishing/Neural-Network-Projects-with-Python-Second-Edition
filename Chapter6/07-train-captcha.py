@@ -34,26 +34,30 @@ def get_ocr_predictions(
     return res
 
 
-def get_ocr_matches(preds: tt.List[str], labels: tt.List[str]) -> tt.Tuple[int, int]:
+def get_ocr_matches(preds: tt.List[str], labels: tt.List[str]) -> tt.Tuple[int, int, int]:
     res_total, res_matched = 0, 0
+    res_full_match = 0
     for p, l in zip(preds, labels):
+        if p == l:
+            res_full_match += 1
         for c1, c2 in zip(p, l):
             res_total += 1
             if c1 == c2:
                 res_matched += 1
-    return res_total, res_matched
+    return res_total, res_matched, res_full_match
 
 
 @torch.no_grad()
 def validate(model: models_captcha.CaptchaUNet,
              ocr_model: models_captcha.OCRNetwork,
              dataset: data_captcha.Dataset,
-             device: torch.device) -> tt.Tuple[float, float]:
+             device: torch.device) -> tt.Tuple[float, float, float]:
     loader = DataLoader(dataset, BATCH_SIZE, shuffle=True,
                         num_workers=LOADER_WORKERS)
     loss = nn.MSELoss()
     losses = []
     chars_total, chars_matched = 0, 0
+    captchas_matched = 0
     for batch_x, (batch_y, labels) in tqdm.tqdm(loader, desc="Validation"):
         batch_x = batch_x.to(device)
         batch_y = batch_y.to(device)
@@ -62,10 +66,11 @@ def validate(model: models_captcha.CaptchaUNet,
         losses.append(loss_t.detach().item())
 
         ocr_res = get_ocr_predictions(ocr_model, out_t)
-        ocr_total, ocr_matched = get_ocr_matches(ocr_res, labels)
+        ocr_total, ocr_matched, full_matched = get_ocr_matches(ocr_res, labels)
         chars_total += ocr_total
         chars_matched += ocr_matched
-    return np.mean(losses), chars_matched / chars_total
+        captchas_matched += full_matched
+    return np.mean(losses), chars_matched / chars_total, captchas_matched / len(dataset)
 
 
 if __name__ == '__main__':
@@ -123,12 +128,15 @@ if __name__ == '__main__':
                     optimizer.step()
                     losses.append(loss_t.detach().item())
                 train_loss = np.mean(losses)
-                val_loss, ocr_correct = validate(model, ocr_model, val_dataset, device)
+                val_loss, ocr_correct, captchas_correct = validate(
+                    model, ocr_model, val_dataset, device)
                 print(f"Epoch {epoch}: train_loss={train_loss:.5f}, "
-                      f"val_loss={val_loss:.5f}, correct_ocr={ocr_correct}")
+                      f"val_loss={val_loss:.5f}, ocr_correct={ocr_correct:.5f}, "
+                      f"captchas_correct={captchas_correct:.5f}")
                 writer.add_scalar("loss", train_loss, epoch)
                 writer.add_scalar("loss-val", val_loss, epoch)
                 writer.add_scalar("ocr-correct", ocr_correct, epoch)
+                writer.add_scalar("captchas-correct", captchas_correct, epoch)
                 if best_val_loss is None or best_val_loss > val_loss:
                     print(f"Model improved, saving")
                     torch.save(model.state_dict(), args.name + "_best.model")

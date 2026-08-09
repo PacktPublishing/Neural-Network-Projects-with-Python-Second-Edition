@@ -7,6 +7,7 @@ import numpy as np
 import pathlib
 import string
 import itertools
+import torch
 from PIL import Image, ImageFont, ImageDraw
 from torch.utils.data import Dataset
 import albumentations as A
@@ -79,12 +80,30 @@ def make_target_image(captcha: str) -> Image:
     return text_img
 
 
+def generate_ocr_val_set(size: int, seed: int) -> tt.Tuple[tt.List[str], torch.Tensor]:
+    """
+    Generate validation set --- blurred images from random characters
+    :return: random chars and their images as single tensor
+    """
+    random.seed(seed)
+    blur_pipeline = A.GaussianBlur(p=0.5)
+    captchas = []
+    arrays = []
+    for _ in range(size):
+        s = random.choice(CAPTCHA_CHARS)
+        captchas.append(s)
+        img = make_target_image(s)
+        img_np = np.array(img)
+        img_np = (img_np.astype(np.float32) / 255.0)
+        blur_img = blur_pipeline(image=img_np)['image']
+        arrays.append(np.expand_dims(blur_img, 0))
+    return captchas, torch.as_tensor(np.stack(arrays))
+
+
 class OCRDataset(Dataset):
     def __init__(self, size_mul: int = 1):
         self.size_mul = size_mul
-        self.cache = dict()
         self.postprocess = A.Compose([
-            A.Normalize(normalization="min_max", max_pixel_value=255),
             A.GaussianBlur(p=0.5),
             A.ToTensorV2(),
         ])
@@ -94,13 +113,10 @@ class OCRDataset(Dataset):
 
     def __getitem__(self, item):
         item %= len(CAPTCHA_CHARS)
-        res = self.cache.get(item)
-        if res is not None:
-            return res, item
         img = make_target_image(CAPTCHA_CHARS[item])
         img_np = np.array(img)
+        img_np = (img_np.astype(np.float32) / 255.0)
         res = self.postprocess(image=img_np)['image']
-        self.cache[item] = res
         return res, item
 
 
@@ -109,7 +125,6 @@ class CaptchaDataset(Dataset):
     def __init__(self, samples: tt.List[TSample]):
         self.samples = samples
         self.postprocess = A.Compose([
-            A.Normalize(normalization="min_max", max_pixel_value=255),
             A.ToTensorV2(),
         ])
 
@@ -119,7 +134,9 @@ class CaptchaDataset(Dataset):
     def __getitem__(self, item):
         file_path, label = self.samples[item]
         img = cv2.imread(file_path, flags=cv2.IMREAD_COLOR_RGB)
+        img = (img.astype(np.float32) / 255.0)
         norm_img = self.postprocess(image=img)['image']
         tgt_img = np.array(make_target_image(label))
+        tgt_img = (tgt_img.astype(np.float32) / 255.0)
         norm_tgt_img = self.postprocess(image=tgt_img)['image']
         return norm_img, (norm_tgt_img, label)
