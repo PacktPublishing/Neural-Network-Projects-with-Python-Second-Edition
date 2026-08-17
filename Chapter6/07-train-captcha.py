@@ -34,7 +34,8 @@ def get_ocr_predictions(
     return res
 
 
-def get_ocr_matches(preds: tt.List[str], labels: tt.List[str]) -> tt.Tuple[int, int, int]:
+def get_ocr_matches(preds: tt.List[str], labels: tt.List[str]) \
+        -> tt.Tuple[int, int, int]:
     res_total, res_matched = 0, 0
     res_full_match = 0
     for p, l in zip(preds, labels):
@@ -70,7 +71,8 @@ def validate(model: models_captcha.CaptchaUNet,
         chars_total += ocr_total
         chars_matched += ocr_matched
         captchas_matched += full_matched
-    return np.mean(losses), chars_matched / chars_total, captchas_matched / len(dataset)
+    return np.mean(losses), chars_matched / chars_total, \
+        captchas_matched / len(dataset)
 
 
 if __name__ == '__main__':
