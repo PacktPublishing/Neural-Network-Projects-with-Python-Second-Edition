@@ -10,6 +10,7 @@ dependencies = [
     "jupyterlab>=4.5.7",
     "kaleido>=1.2.0",
     "keras~=3.13.2",
+    "matplotlib>=3.10.9",
     "pandas>=2.3.3",
     "plotly>=6.6.0",
     "pytest>=9.0.3",

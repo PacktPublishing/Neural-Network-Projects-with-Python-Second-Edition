@@ -40,7 +40,7 @@ def make_net(key) -> tt.List[TLayer]:
 def show_net(net: tt.List[TLayer]):
     print("Network layers:")
     for i, (w, b) in enumerate(net):
-        print(f"{i}: w={w.shape}), b={b.shape}")
+        print(f"{i}: w={w.shape}, b={b.shape}")
 
 
 def predict(net: tt.List[TLayer], batch: jax.Array) -> jax.Array:
@@ -58,6 +58,7 @@ def loss(net: tt.List[TLayer], x: jax.Array, y: jax.Array) -> jax.Array:
     return res
 
 
+@jax.jit
 def update(net: tt.List[TLayer], x: jax.Array, y: jax.Array) -> \
         tt.Tuple[tt.List[TLayer], jax.Array]:
     loss_value, grads = value_and_grad(loss)(net, x, y)

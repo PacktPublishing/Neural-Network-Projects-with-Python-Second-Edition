@@ -61,14 +61,17 @@ def data_pred(df: pd.DataFrame) -> np.array:
 
 def show_confusion_matrix(true_y: np.array, pred_y: np.array):
     matrix = confusion_matrix(true_y, pred_y)
-    idx = list(map(lambda s: "Predicted " + s, CLASS_NAMES))
-    col = list(map(lambda s: "True " + s, CLASS_NAMES))
+    idx = list(map(lambda s: "True " + s, CLASS_NAMES))
+    col = list(map(lambda s: "Pred " + s, CLASS_NAMES))
     df = pd.DataFrame(matrix, index=idx)
     print("\nConfusion matrix")
     print(tabulate(df, headers=col, tablefmt='rounded_grid'))
 
 
-def make_roc_plot(true_y: np.array, prob_y: np.array, img_name: str):
+def make_roc_plot_plotly(true_y: np.array, prob_y: np.array, img_name: str):
+    """
+    This function requires chrome to be installed to work properly (but produces colorful plots).
+    """
     fig = go.Figure()
     fig.add_shape(
         type='line', line=dict(dash='dash'),
@@ -80,3 +83,23 @@ def make_roc_plot(true_y: np.array, prob_y: np.array, img_name: str):
         name = f"{class_name.split('-')[1]} (AUC={auc(fpr, tpr):.4f})"
         fig.add_trace(go.Scatter(x=fpr, y=tpr, name=name, mode='lines'))
     fig.write_image(img_name, scale=5)
+
+
+def make_roc_plot(true_y: np.array, prob_y: np.array, img_name: str):
+    """
+    Function uses matplotlib to generate roc curve plot.
+    """
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
+    STYLES = ['-', '--', '-.']
+
+    for i, class_name in enumerate(COLS_PRED):
+        fpr, tpr, _ = roc_curve(true_y[:, i], prob_y[:, i])
+        name = f"{class_name.split('-')[1]} (AUC={auc(fpr, tpr):.4f})"
+        ax.plot(fpr, tpr, STYLES[i], label=name, color='black', markersize=7)
+    ax.set_xlabel("False Positive rate")
+    ax.set_ylabel("True Positive rate")
+    ax.legend()
+    fig.savefig(img_name)
