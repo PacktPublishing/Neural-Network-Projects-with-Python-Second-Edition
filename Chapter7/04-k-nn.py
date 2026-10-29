@@ -91,11 +91,11 @@ if __name__ == '__main__':
         print(f"Test took {timer.duration}")
     binary_preds = pred_probs > 0.5
 
-    data.show_confusion_matrix(labels_test, binary_preds)
+    data.show_confusion_matrix(labels_test, binary_preds, "Threshold 0.5")
     out_prefix = f"top-{args.k}-{args.data}"
     data.make_pr_plot(labels_test, pred_probs, out_prefix + "-pr.svg", baseline=0.5)
     data.make_roc_plot(labels_test, pred_probs, out_prefix + "-roc.svg")
     best_thr = data.make_f1_plot(labels_test, pred_probs, out_prefix + "-f1.svg")
 
     binary_preds = pred_probs > best_thr
-    data.show_confusion_matrix(labels_test, binary_preds)
+    data.show_confusion_matrix(labels_test, binary_preds, f"Threshold {best_thr:.3f}")

@@ -131,11 +131,12 @@ def data_target(df: pd.DataFrame) -> np.ndarray:
 
 
 def show_confusion_matrix(true_y: np.ndarray, pred_y: np.ndarray, name: str,
-                          show_numbers: bool = False, plain: bool = False):
+                          class_names: tt.Iterable[str] = CLASS_NAMES,
+                          show_numbers: bool = True, plain: bool = False):
     matrix = confusion_matrix(true_y, pred_y, normalize='true')
     raw_matrix = confusion_matrix(true_y, pred_y, normalize=None)
-    idx = list(map(lambda s: "Predicted " + s, CLASS_NAMES))
-    col = list(map(lambda s: "True " + s, CLASS_NAMES))
+    idx = list(map(lambda s: "True " + s, class_names))
+    col = list(map(lambda s: "Pred " + s, class_names))
 
     if show_numbers:
         data = [
@@ -149,10 +150,11 @@ def show_confusion_matrix(true_y: np.ndarray, pred_y: np.ndarray, name: str,
     print(f"\n{name} confusion matrix")
     print(tabulate(df, headers=col, tablefmt='outline' if plain else 'rounded_grid'))
 
-    prec = 100 * raw_matrix[1][1] / (raw_matrix[1][1] + raw_matrix[1][0])
-    rec = 100 * raw_matrix[1][1] / (raw_matrix[1][1] + raw_matrix[0][1])
+    rec = 100 * raw_matrix[1][1] / (raw_matrix[1][1] + raw_matrix[1][0])
+    prec = 100 * raw_matrix[1][1] / (raw_matrix[1][1] + raw_matrix[0][1])
     f1 = 2 / (1 / prec + 1 / rec)
     print(f"Precision = {prec:.2f}%, recall = {rec:.2f}%, F1 = {f1:.2f}%\n")
+
 
 
 def make_loss_plot(loss: np.ndarray, img_name: str, val: tt.Optional[np.ndarray] = None):

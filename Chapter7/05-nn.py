@@ -42,25 +42,28 @@ def validate(model: Network, dataset: TensorDataset) -> float:
 
 @torch.no_grad()
 def test_classifier(
-        name: str, model: Network, dataset: TensorDataset):
+        name: str, model: Network, dataset: TensorDataset,
+):
     loader = DataLoader(dataset, BATCH_SIZE, shuffle=False)
     pred_probs = []
+    labels = []
     for batch_x, batch_y in loader:
         out_t = model(batch_x)
         probs_t = torch.sigmoid(out_t)
         pred_probs.extend(probs_t.detach().numpy())
+        labels.extend(batch_y.numpy())
+    labels_test = np.array(labels)
     pred_probs = np.array(pred_probs)
     binary_preds = pred_probs > 0.5
 
-    data.show_confusion_matrix(labels_test, binary_preds)
+    data.show_confusion_matrix(labels_test, binary_preds, "Threshold 0.5")
     out_prefix = f"nn-{name}"
     data.make_pr_plot(labels_test, pred_probs, out_prefix + "-pr.svg", baseline=0.5)
     data.make_roc_plot(labels_test, pred_probs, out_prefix + "-roc.svg")
     best_thr = data.make_f1_plot(labels_test, pred_probs, out_prefix + "-f1.svg")
 
     binary_preds = pred_probs > best_thr
-    data.show_confusion_matrix(labels_test, binary_preds)
-
+    data.show_confusion_matrix(labels_test, binary_preds, f"Threshold {best_thr:.3f}")
 
 
 if __name__ == '__main__':

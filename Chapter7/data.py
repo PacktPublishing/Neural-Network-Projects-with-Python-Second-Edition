@@ -6,9 +6,11 @@ from transformers.models.bert.tokenization_bert import BertTokenizer
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve
 import matplotlib.pyplot as plt
+from tabulate import tabulate
 
 
 DEFAULT_SEED = 122
+CLASS_NAMES = ("bad review", "good review")
 
 
 def load_dataset() -> tt.Tuple[tt.List[str], tt.List[bool]]:
@@ -86,10 +88,31 @@ def get_long_text_embedding(
     return np.mean(embeddings, axis=0)
 
 
-def show_confusion_matrix(true_y: np.ndarray, pred_y: np.ndarray):
+# fixed
+def show_confusion_matrix(true_y: np.ndarray, pred_y: np.ndarray, name: str,
+                          class_names: tt.Iterable[str] = CLASS_NAMES,
+                          show_numbers: bool = True, plain: bool = False):
     matrix = confusion_matrix(true_y, pred_y, normalize='true')
-    print("Confusion matrix:")
-    print(matrix)
+    raw_matrix = confusion_matrix(true_y, pred_y, normalize=None)
+    idx = list(map(lambda s: "True " + s, class_names))
+    col = list(map(lambda s: "Pred " + s, class_names))
+
+    if show_numbers:
+        data = [
+            [f"{n:<5} ({p*100:0.2f}%)" for p, n in zip(r1, r2)]
+            for r1, r2 in zip(matrix, raw_matrix)
+        ]
+        df = pd.DataFrame(data, index=idx)
+    else:
+        df = pd.DataFrame(matrix, index=idx)
+        df = df.map(lambda f: f"{f*100:0.2f}%")
+    print(f"\n{name} confusion matrix")
+    print(tabulate(df, headers=col, tablefmt='outline' if plain else 'rounded_grid'))
+
+    rec = 100 * raw_matrix[1][1] / (raw_matrix[1][1] + raw_matrix[1][0])
+    prec = 100 * raw_matrix[1][1] / (raw_matrix[1][1] + raw_matrix[0][1])
+    f1 = 2 / (1 / prec + 1 / rec)
+    print(f"Precision = {prec:.2f}%, recall = {rec:.2f}%, F1 = {f1:.2f}%\n")
 
 
 def make_roc_plot(true_y: np.ndarray, prob_y: np.ndarray, img_name: str):
